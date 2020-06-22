@@ -24,11 +24,27 @@
         @include('layouts.partials.navbar')
         @include('layouts.partials.sidebar')
 
+        
+
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-
+            <section class="content-header">
+                <div class="container-fluid">
+                  <div class="row mb-2">
+                    <div class="col-sm-6">
+                      <h1>@yield('content-header')</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        @yield('content-actions')
+                    </div>
+                  </div>                  
+                </div><!-- /.container-fluid -->                
+              </section>
+        <section class="content">
+            @include('layouts.partials.alert.success')
+            @include('layouts.partials.alert.error')
             @yield('content')
-
+        </section>
         </div>
 
         @include('layouts.partials.footer')

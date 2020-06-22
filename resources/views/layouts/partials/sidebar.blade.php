@@ -32,6 +32,14 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
+                <a href="{{route('produk.index')}}" class="nav-link {{ activeSegment('produk') }}">
+                        <i class="nav-icon fas fa-th-large"></i>
+                        <p>
+                            Produk
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
                     <a href="#" class="nav-link" onclick="document.getElementById('logout-form').submit()">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
                         <p>
