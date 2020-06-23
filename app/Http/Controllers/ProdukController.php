@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProdukStoreRequest;
+use App\Http\Requests\ProdukUpdateRequest;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,7 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $produk = Produk::latest()->paginate(2);
+        $produk = Produk::latest()->paginate(10);
         return view('produk.index')->with('produk', $produk);
     }
 
@@ -48,6 +49,7 @@ class ProdukController extends Controller
             'gambar' => $gambar_path,
             'barcode' => $request->barcode,
             'harga' => $request->harga,
+            'qty' => $request->qty,
             'status' => $request->status
         ]);
 
@@ -77,7 +79,7 @@ class ProdukController extends Controller
      */
     public function edit(Produk $produk)
     {
-        //
+        return view('produk.edit')->with('produk', $produk);
     }
 
     /**
@@ -87,9 +89,28 @@ class ProdukController extends Controller
      * @param  \App\Models\Produk  $produk
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Produk $produk)
+    public function update(ProdukUpdateRequest $request, Produk $produk)
     {
-        //
+        $produk->nama = $request->nama;
+        $produk->deskripsi = $request->deskripsi;
+        $produk->barcode = $request->barcode;
+        $produk->harga = $request->harga;
+        $produk->qty = $request->qty;
+        $produk->status = $request->status;
+
+        if ($request->hasFile('gambar')) {
+            //Hapus gambar yang di database
+            \Storage::delete($produk->gambar);
+            //Simpan gambar baru
+            $gambar_path = $request->file('gambar')->store('produk');
+            $produk->gambar = $gambar_path;
+        }
+
+        if (!$produk->save()) {
+            return redirect()->back()->with('error', 'Terjadi Kesalahan');
+        } else {
+            return redirect()->route('produk.index')->with('success', 'Produk Berhasil Diupdate');
+        }
     }
 
     /**
@@ -100,6 +121,12 @@ class ProdukController extends Controller
      */
     public function destroy(Produk $produk)
     {
-        //
+        if ($produk->gambar) {
+            \Storage::delete($produk->gambar);
+        }
+        $produk->delete();
+        return response()->json([
+            'success' => true
+        ]);
     }
 }

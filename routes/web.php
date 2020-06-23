@@ -23,4 +23,5 @@ Auth::routes();
 Route::prefix('admin')->group(function () {
     Route::get('/', 'HomeController@index')->name('home');
     Route::resource('produk', 'ProdukController');
+    Route::resource('customer', 'CustomerController');
 });

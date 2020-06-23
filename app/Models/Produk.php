@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Produk extends Model
 {
@@ -12,6 +13,7 @@ class Produk extends Model
         'gambar',
         'barcode',
         'harga',
+        'qty',
         'status'
     ];
 }

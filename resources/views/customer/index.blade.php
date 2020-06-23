@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Daftar Produk')
-@section('content-header', 'Daftar Produk')
+@section('title', 'Daftar Customer')
+@section('content-header', 'Daftar Customer')
 @section('content-actions')
-<a href="{{route('produk.create')}}" class="btn btn-primary float-right">Tambah</a>
+<a href="{{route('customer.create')}}" class="btn btn-primary float-right">Tambah</a>
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -15,43 +15,35 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Nama Produk</th>
-                    <th>Deskripsi</th>
-                    <th>Gambar</th>
-                    <th>Barcode</th>
-                    <th>Harga</th>
-                    <th>Qty</th>
-                    <th>Status</th>
+                    <th>Avatar</th>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>HP</th>
+                    <th>Alamat</th>
                     <th>Dibuat Pada</th>
-                    <th>Diupdate Pada</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($produk as $data)       
+                @foreach ($customer as $data)       
                 <tr>
                     <td>{{$data->id}}</td>
+                <td><img src="{{ $data->getAvatarUrl() }}" width="50" alt=""></td>
                     <td>{{$data->nama}}</td>
-                    <td>{{$data->deskripsi}}</td>
-                <td><img src="{{Storage::url($data->gambar)}}" alt="" width="100"></td>
-                    <td>{{$data->barcode}}</td>
-                    <td>{{$data->harga}}</td>
-                    <td>{{$data->qty}}</td>
-                    <td>
-                    <span class="right badge badge-{{$data->status ? 'success' : 'danger'}}">{{$data->status ? 'Aktif' : 'Tidak Aktif'}}</span>
-                    </td>
+                    <td>{{$data->email}}</td>
+                    <td>{{$data->hp}}</td>
+                    <td>{{$data->alamat}}</td>
                     <td>{{$data->created_at}}</td>
-                    <td>{{$data->updated_at}}</td>
                     <td>
-                        <a href="{{ route('produk.edit',$data )}}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                        {{-- <a href="{{route('produk.show',$data->id)}}" class="btn btn-info"><i class="fas fa-eye"></i></a> --}}
-                    <button class="btn btn-danger btn-delete" data-url="{{ route('produk.destroy',$data) }}"><i class="fas fa-trash"></i></button>
+                        <a href="{{ route('customer.edit',$data )}}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                        {{-- <a href="{{route('customer.show',$data->id)}}" class="btn btn-info"><i class="fas fa-eye"></i></a> --}}
+                    <button class="btn btn-danger btn-delete" data-url="{{ route('customer.destroy',$data) }}"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
-        {{$produk->render()}}
+        {{$customer->render()}}
     </div>
 </div>
 @endsection

@@ -40,6 +40,14 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
+                    <a href="{{route('customer.index')}}" class="nav-link {{ activeSegment('customer') }}">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>
+                                Customer
+                            </p>
+                        </a>
+                    </li>
+                <li class="nav-item has-treeview">
                     <a href="#" class="nav-link" onclick="document.getElementById('logout-form').submit()">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
                         <p>
