@@ -76,7 +76,7 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
-        //
+        return view('customer.edit', compact('customer'));
     }
 
     /**
@@ -88,7 +88,24 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        //
+        $customer->nama = $request->nama;
+        $customer->email = $request->email;
+        $customer->hp = $request->hp;
+        $customer->alamat = $request->alamat;
+
+        if ($request->hasFile('avatar')) {
+            //Hapus avatar yang di database
+            \Storage::delete($customer->avatar);
+            //Simpan avatar baru
+            $avatar_path = $request->file('avatar')->store('customer');
+            $customer->avatar = $avatar_path;
+        }
+
+        if (!$customer->save()) {
+            return redirect()->back()->with('error', 'Terjadi Kesalahan');
+        } else {
+            return redirect()->route('customer.index')->with('success', 'Customer Berhasil Diupdate');
+        }
     }
 
     /**
@@ -99,6 +116,12 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        //
+        if ($customer->avatar) {
+            \Storage::delete($customer->avatar);
+        }
+        $customer->delete();
+        return response()->json([
+            'success' => true
+        ]);
     }
 }

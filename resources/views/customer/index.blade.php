@@ -35,7 +35,7 @@
                     <td>{{$data->alamat}}</td>
                     <td>{{$data->created_at}}</td>
                     <td>
-                        <a href="{{ route('customer.edit',$data )}}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                        <a href="{{ route('customer.edit',$data) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                         {{-- <a href="{{route('customer.show',$data->id)}}" class="btn btn-info"><i class="fas fa-eye"></i></a> --}}
                     <button class="btn btn-danger btn-delete" data-url="{{ route('customer.destroy',$data) }}"><i class="fas fa-trash"></i></button>
                     </td>
