@@ -19,11 +19,13 @@ Route::get('/', function () {
 
 Auth::routes();
 
-
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/', 'HomeController@index')->name('home');
     Route::get('/setting', 'SettingController@index')->name('setting.index');
     Route::post('/setting', 'SettingController@store')->name('setting.store');
     Route::resource('produk', 'ProdukController');
     Route::resource('customer', 'CustomerController');
+
+    Route::get('/cart', 'CartController@index')->name('cart.index');
+    Route::post('/cart', 'CartController@store')->name('cart.store');
 });

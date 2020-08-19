@@ -37,6 +37,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function cart()
+    {
+        return $this->belongsToMany(Produk::class, 'user_cart')->withPivot('quantity');
+    }
+
     public function getFullName()
     {
         return $this->nama_depan . ' ' . $this->nama_belakang;
