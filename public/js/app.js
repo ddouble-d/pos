@@ -69073,8 +69073,10 @@ var Cart = /*#__PURE__*/function (_Component) {
     _this.state = {
       cart: [],
       produk: [],
+      customer: [],
       barcode: '',
-      search: ''
+      search: '',
+      customer_id: ''
     };
     _this.loadCart = _this.loadCart.bind(_assertThisInitialized(_this));
     _this.loadProduk = _this.loadProduk.bind(_assertThisInitialized(_this));
@@ -69084,15 +69086,16 @@ var Cart = /*#__PURE__*/function (_Component) {
     _this.handleEmptyCart = _this.handleEmptyCart.bind(_assertThisInitialized(_this));
     _this.handleChangeSearch = _this.handleChangeSearch.bind(_assertThisInitialized(_this));
     _this.handleSearch = _this.handleSearch.bind(_assertThisInitialized(_this));
+    _this.setCustomerId = _this.setCustomerId.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(Cart, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      // load usercart
       this.loadCart();
       this.loadProduk();
+      this.loadCustomer();
     }
   }, {
     key: "handleOnChangeBarcode",
@@ -69216,6 +69219,13 @@ var Cart = /*#__PURE__*/function (_Component) {
       }
     }
   }, {
+    key: "setCustomerId",
+    value: function setCustomerId(event) {
+      this.setState({
+        customer_id: event.target.value
+      });
+    }
+  }, {
     key: "addProdukToCart",
     value: function addProdukToCart(barcode) {
       var _this5 = this;
@@ -69241,14 +69251,27 @@ var Cart = /*#__PURE__*/function (_Component) {
       return Object(lodash__WEBPACK_IMPORTED_MODULE_4__["sum"])(total);
     }
   }, {
+    key: "loadCustomer",
+    value: function loadCustomer() {
+      var _this6 = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/admin/customer').then(function (res) {
+        var customer = res.data;
+
+        _this6.setState({
+          customer: customer
+        });
+      });
+    }
+  }, {
     key: "loadCart",
     value: function loadCart() {
-      var _this6 = this;
+      var _this7 = this;
 
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/admin/cart').then(function (res) {
         var cart = res.data;
 
-        _this6.setState({
+        _this7.setState({
           cart: cart
         });
       });
@@ -69256,14 +69279,14 @@ var Cart = /*#__PURE__*/function (_Component) {
   }, {
     key: "loadProduk",
     value: function loadProduk() {
-      var _this7 = this;
+      var _this8 = this;
 
       var search = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
       var query = !!search ? "?search=".concat(search) : '';
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/admin/produk".concat(query)).then(function (res) {
         var produk = res.data.data;
 
-        _this7.setState({
+        _this8.setState({
           produk: produk
         });
       });
@@ -69271,11 +69294,12 @@ var Cart = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this8 = this;
+      var _this9 = this;
 
       var _this$state = this.state,
           cart = _this$state.cart,
           produk = _this$state.produk,
+          customer = _this$state.customer,
           barcode = _this$state.barcode;
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "row"
@@ -69296,12 +69320,16 @@ var Cart = /*#__PURE__*/function (_Component) {
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("select", {
-        name: "",
-        id: "",
-        className: "form-control"
+        className: "form-control",
+        onChange: this.setCustomerId
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
         value: ""
-      }, "Walking Customer")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      }, "Walking Customer"), customer.map(function (cus) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
+          key: cus.id,
+          value: cus.id
+        }, cus.nama);
+      })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "user-cart"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "card"
@@ -69317,37 +69345,39 @@ var Cart = /*#__PURE__*/function (_Component) {
           className: "form-control form-control-sm qty",
           value: c.pivot.quantity,
           onChange: function onChange(event) {
-            return _this8.handleChangeQty(c.id, event.target.value);
+            return _this9.handleChangeQty(c.id, event.target.value);
           }
         }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
           className: "btn btn-danger btn-sm",
           onClick: function onClick() {
-            return _this8.handleDelete(c.id);
+            return _this9.handleDelete(c.id);
           }
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
           className: "fas fa-trash"
         }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-right"
-        }, "Rp  ", c.harga * c.pivot.quantity));
+        }, window.APP.simbol, "  ", c.harga * c.pivot.quantity));
       }))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "row"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col"
       }, "Total:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col text-right"
-      }, this.getTotal(cart))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      }, window.APP.simbol, " ", this.getTotal(cart))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "row"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
         type: "button",
         className: "btn btn-danger btn-block",
-        onClick: this.handleEmptyCart
+        onClick: this.handleEmptyCart,
+        disabled: !cart.length
       }, "Reset")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
         type: "button",
-        className: "btn btn-primary btn-block"
+        className: "btn btn-primary btn-block",
+        disabled: !cart.length
       }, "Submit")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-md-6 col-lg-8"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -69363,7 +69393,7 @@ var Cart = /*#__PURE__*/function (_Component) {
       }, produk.map(function (p) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           onClick: function onClick() {
-            return _this8.addProdukToCart(p.barcode);
+            return _this9.addProdukToCart(p.barcode);
           },
           className: "item",
           key: p.id,

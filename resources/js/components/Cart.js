@@ -11,8 +11,10 @@ export default class Cart extends Component {
         this.state = {
             cart: [],
             produk: [],
+            customer: [],
             barcode: '',
             search: '',
+            customer_id: ''
         };
 
         this.loadCart = this.loadCart.bind(this);
@@ -23,12 +25,13 @@ export default class Cart extends Component {
         this.handleEmptyCart = this.handleEmptyCart.bind(this);
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
+        this.setCustomerId = this.setCustomerId.bind(this);
     }
 
     componentDidMount() {
-        // load usercart
         this.loadCart();
         this.loadProduk();
+        this.loadCustomer();
     }
 
     handleOnChangeBarcode(event) {
@@ -128,6 +131,10 @@ export default class Cart extends Component {
         }
     }
 
+    setCustomerId(event) {
+        this.setState({customer_id: event.target.value});
+    }
+
     addProdukToCart(barcode) {
         axios.post('/admin/cart', {barcode}).then(res => {
             this.loadCart();
@@ -147,6 +154,13 @@ export default class Cart extends Component {
         return sum(total);
     }
 
+    loadCustomer() {
+        axios.get('/admin/customer').then(res => {
+            const customer = res.data;
+            this.setState({customer});
+        })
+    }
+
     loadCart() {
         axios.get('/admin/cart').then( res => {
             const cart = res.data
@@ -163,7 +177,7 @@ export default class Cart extends Component {
     }
 
     render() {
-        const {cart, produk, barcode} = this.state;
+        const {cart, produk, customer, barcode} = this.state;
         return (
             <div className="row">
             <div className="col-md-6 col-lg-4">
@@ -180,8 +194,12 @@ export default class Cart extends Component {
                         </form>
                     </div>
                     <div className="col">
-                        <select name="" id="" className="form-control">
+                        <select 
+                            className="form-control"
+                            onChange={this.setCustomerId}
+                        >
                             <option value="">Walking Customer</option>
+                            {customer.map(cus => <option key={cus.id} value={cus.id}>{cus.nama}</option>)}
                         </select>
                     </div>
                 </div>
@@ -213,7 +231,7 @@ export default class Cart extends Component {
                                                 <i className="fas fa-trash"></i>
                                             </button>
                                         </td>
-                                        <td className="text-right">Rp  {c.harga * c.pivot.quantity}</td>
+                                        <td className="text-right">{window.APP.simbol}  {c.harga * c.pivot.quantity}</td>
                                     </tr>
                                 ))}                                
                             </tbody>
@@ -223,7 +241,7 @@ export default class Cart extends Component {
 
                 <div className="row">
                     <div className="col">Total:</div>
-                    <div className="col text-right">{ this.getTotal(cart) }</div>
+                    <div className="col text-right">{window.APP.simbol} { this.getTotal(cart) }</div>
                 </div>
                 <div className="row">
                     <div className="col">
@@ -231,10 +249,15 @@ export default class Cart extends Component {
                             type="button" 
                             className="btn btn-danger btn-block"
                             onClick={this.handleEmptyCart}
+                            disabled={!cart.length}
                         >Reset</button>
                     </div>
                     <div className="col">
-                        <button type="button" className="btn btn-primary btn-block">Submit</button>
+                        <button 
+                            type="button" 
+                            className="btn btn-primary btn-block"
+                            disabled={!cart.length}
+                        >Submit</button>
                     </div>
                 </div>
             </div>
