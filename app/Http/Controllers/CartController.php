@@ -35,6 +35,42 @@ class CartController extends Controller
             $request->user()->cart()->attach($produk->id, ['quantity' => 1]);
         }
         
-        return response('', 200);
+        return response('', 204);
+    }
+
+    public function changeQty(Request $request)
+    {
+        $request->validate([
+            'produk_id' => 'required|exists:produks,id',
+            'quantity'  => 'required|integer|min:1'
+        ]);
+
+        $cart = $request->user()->cart()->where('produk_id', $request->produk_id)->first();
+
+        if($cart) {
+            $cart->pivot->quantity = $request->quantity;
+            $cart->pivot->save();
+        }
+
+        return response([
+            'success' => true
+        ]);
+    }
+
+    public function delete(Request $request)
+    {
+        $request->validate([
+            'produk_id' => 'required|integer|exists:produks,id'
+        ]);
+        $request->user()->cart()->detach($request->produk_id);
+
+        return response('', 204);
+    }
+
+    public function empty(Request $request)
+    {
+        $request->user()->cart()->detach();
+
+        return response('', 204);
     }
 }

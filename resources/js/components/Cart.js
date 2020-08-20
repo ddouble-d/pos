@@ -10,17 +10,25 @@ export default class Cart extends Component {
         super(props)
         this.state = {
             cart: [],
+            produk: [],
             barcode: '',
+            search: '',
         };
 
         this.loadCart = this.loadCart.bind(this);
+        this.loadProduk = this.loadProduk.bind(this);
         this.handleOnChangeBarcode = this.handleOnChangeBarcode.bind(this);
         this.handleScanBarcode = this.handleScanBarcode.bind(this);
+        this.handleChangeQty = this.handleChangeQty.bind(this);
+        this.handleEmptyCart = this.handleEmptyCart.bind(this);
+        this.handleChangeSearch = this.handleChangeSearch.bind(this);
+        this.handleSearch = this.handleSearch.bind(this);
     }
 
     componentDidMount() {
         // load usercart
         this.loadCart();
+        this.loadProduk();
     }
 
     handleOnChangeBarcode(event) {
@@ -38,7 +46,6 @@ export default class Cart extends Component {
                 this.setState({barcode: ''})
             })
             .catch(err => {
-                console.log(err)
                 Swal.fire(
                     'Error!',
                     err.response.data.message,
@@ -48,8 +55,91 @@ export default class Cart extends Component {
         }
     }
 
-    handleChangeQty(event) {
-        // 
+    handleChangeQty(produk_id, qty) {
+        const cart = this.state.cart.map(c => {
+            if (c.id === produk_id) {
+                c.pivot.quantity = qty;
+            }
+            return c;
+        });
+
+        this.setState({cart});
+
+        axios.post('/admin/cart/change-qty', {produk_id, quantity: qty})
+            .then(res => {
+
+            })
+            .catch(err => {
+                Swal.fire(
+                    'Error!',
+                    err.response.data.message,
+                    'error'
+                );
+            });
+    }
+
+    handleDelete(produk_id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            if (result.value) {
+                axios.post('/admin/cart/delete', {produk_id, _method: 'DELETE'})
+                    .then(res => {
+                        const cart = this.state.cart.filter(c => c.id !== produk_id);
+                        this.setState({cart});
+                    })
+            }
+          })        
+    }
+
+    handleEmptyCart() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, empty the cart!'
+          }).then((result) => {
+            if (result.value) {
+                axios.post('/admin/cart/empty', {_method: 'DELETE'})
+                    .then(res => {
+                        this.setState({cart: []});
+                    })
+            }
+          })
+    }
+
+    handleChangeSearch(event) {
+        const search = event.target.value;
+        this.setState({search});
+    }
+
+    handleSearch(event) {
+        if(event.keyCode === 13) {
+            this.loadProduk(event.target.value);
+        }
+    }
+
+    addProdukToCart(barcode) {
+        axios.post('/admin/cart', {barcode}).then(res => {
+            this.loadCart();
+            this.setState({barcode: ''})
+        })
+        .catch(err => {
+            Swal.fire(
+                'Error!',
+                err.response.data.message,
+                'error'
+            );
+        })
     }
 
     getTotal(cart) {
@@ -64,8 +154,16 @@ export default class Cart extends Component {
         })
     }
 
+    loadProduk(search = '') {
+        const query = !!search ? `?search=${search}` : '';
+        axios.get(`/admin/produk${query}`).then(res => {
+            const produk = res.data.data;
+            this.setState({produk})
+        })
+    }
+
     render() {
-        const {cart, barcode} = this.state;
+        const {cart, produk, barcode} = this.state;
         return (
             <div className="row">
             <div className="col-md-6 col-lg-4">
@@ -102,8 +200,16 @@ export default class Cart extends Component {
                                     <tr key={c.id}>
                                         <td>{c.nama}</td>
                                         <td>
-                                            <input type="text" className="form-control form-control-sm qty" value={c.pivot.quantity} onChange={this.handleChangeQty}/>
-                                            <button className="btn btn-danger btn-sm">
+                                            <input 
+                                                type="number" 
+                                                className="form-control form-control-sm qty" 
+                                                value={c.pivot.quantity} 
+                                                onChange={event => this.handleChangeQty(c.id, event.target.value)}
+                                            />
+                                            <button 
+                                                className="btn btn-danger btn-sm"
+                                                onClick={() => this.handleDelete(c.id)}
+                                            >
                                                 <i className="fas fa-trash"></i>
                                             </button>
                                         </td>
@@ -121,7 +227,11 @@ export default class Cart extends Component {
                 </div>
                 <div className="row">
                     <div className="col">
-                        <button type="button" className="btn btn-danger btn-block">Cancel</button>
+                        <button 
+                            type="button" 
+                            className="btn btn-danger btn-block"
+                            onClick={this.handleEmptyCart}
+                        >Reset</button>
                     </div>
                     <div className="col">
                         <button type="button" className="btn btn-primary btn-block">Submit</button>
@@ -130,17 +240,26 @@ export default class Cart extends Component {
             </div>
             <div className="col-md-6 col-lg-8">
                 <div className="mb-2">
-                    <input type="text" className="form-control" placeholder="Cari Produk..." />
+                    <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Cari Produk..." 
+                        onChange={this.handleChangeSearch}
+                        onKeyDown={this.handleSearch}
+                    />
                 </div>
                 <div className="order-product">
-                    <div className="item">
-                        <img src="http://localhost:8000/storage/produk/a5XHysg3jn70Vu6hyrxgK6r3ZPHIsSx64IpDsJMq.jpeg" alt="" />
-                        <h5>Yupi</h5>
-                    </div> 
-                    <div className="item">
-                        <img src="http://localhost:8000/storage/produk/a5XHysg3jn70Vu6hyrxgK6r3ZPHIsSx64IpDsJMq.jpeg" alt="" />
-                        <h5>Yupi</h5>
-                    </div>                          
+                    {produk.map(p => (
+                        <div 
+                        onClick={() => this.addProdukToCart(p.barcode)}
+                        className="item" 
+                        key={p.id}
+                        style={{cursor:'pointer'}}
+                        >
+                            <img src={p.image_url} alt="" />
+                            <h5>{p.nama}</h5>
+                        </div> 
+                    ))}
                 </div>
             </div>
         </div>

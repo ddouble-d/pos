@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProdukStoreRequest;
 use App\Http\Requests\ProdukUpdateRequest;
 use App\Models\Produk;
+use App\Http\Resources\ProdukResources;
 use Illuminate\Http\Request;
 
 class ProdukController extends Controller
@@ -14,9 +15,16 @@ class ProdukController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $produk = Produk::latest()->paginate(10);
+        $produk = new Produk();
+        if($request->search) {
+            $produk = $produk->where('nama', $request->search);
+        }
+        $produk = $produk->latest()->paginate(10);
+        if(request()->wantsJson()) {
+            return ProdukResources::collection($produk);
+        }
         return view('produk.index')->with('produk', $produk);
     }
 
