@@ -68978,6 +68978,8 @@ window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
  * code may be modified to fit the specific needs of your application.
  */
 
+window.Swal = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
+
 try {
   window.Popper = __webpack_require__(/*! popper.js */ "./node_modules/popper.js/dist/esm/popper.js")["default"];
   window.$ = window.jQuery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
@@ -69087,6 +69089,7 @@ var Cart = /*#__PURE__*/function (_Component) {
     _this.handleChangeSearch = _this.handleChangeSearch.bind(_assertThisInitialized(_this));
     _this.handleSearch = _this.handleSearch.bind(_assertThisInitialized(_this));
     _this.setCustomerId = _this.setCustomerId.bind(_assertThisInitialized(_this));
+    _this.handleSubmit = _this.handleSubmit.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -69101,7 +69104,6 @@ var Cart = /*#__PURE__*/function (_Component) {
     key: "handleOnChangeBarcode",
     value: function handleOnChangeBarcode(event) {
       var barcode = event.target.value;
-      console.log(barcode);
       this.setState({
         barcode: barcode
       });
@@ -69251,14 +69253,44 @@ var Cart = /*#__PURE__*/function (_Component) {
       return Object(lodash__WEBPACK_IMPORTED_MODULE_4__["sum"])(total);
     }
   }, {
+    key: "handleSubmit",
+    value: function handleSubmit() {
+      var _this6 = this;
+
+      sweetalert2__WEBPACK_IMPORTED_MODULE_3___default.a.fire({
+        title: 'Total Harga',
+        input: 'text',
+        inputValue: this.getTotal(this.state.cart),
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        showLoaderOnConfirm: true,
+        preConfirm: function preConfirm(amount) {
+          return axios__WEBPACK_IMPORTED_MODULE_2___default.a.post('/admin/orders', {
+            customer_id: _this6.state.customer_id,
+            amount: amount
+          }).then(function (res) {
+            _this6.loadCart();
+
+            return res.data;
+          })["catch"](function (err) {
+            console.log(err.response.data.message);
+            sweetalert2__WEBPACK_IMPORTED_MODULE_3___default.a.showValidationMessage(err.response.data.message);
+          });
+        },
+        allowOutsideClick: function allowOutsideClick() {
+          return !sweetalert2__WEBPACK_IMPORTED_MODULE_3___default.a.isLoading();
+        }
+      }).then(function (result) {});
+    }
+  }, {
     key: "loadCustomer",
     value: function loadCustomer() {
-      var _this6 = this;
+      var _this7 = this;
 
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/admin/customer').then(function (res) {
         var customer = res.data;
 
-        _this6.setState({
+        _this7.setState({
           customer: customer
         });
       });
@@ -69266,12 +69298,12 @@ var Cart = /*#__PURE__*/function (_Component) {
   }, {
     key: "loadCart",
     value: function loadCart() {
-      var _this7 = this;
+      var _this8 = this;
 
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/admin/cart').then(function (res) {
         var cart = res.data;
 
-        _this7.setState({
+        _this8.setState({
           cart: cart
         });
       });
@@ -69279,14 +69311,14 @@ var Cart = /*#__PURE__*/function (_Component) {
   }, {
     key: "loadProduk",
     value: function loadProduk() {
-      var _this8 = this;
+      var _this9 = this;
 
       var search = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
       var query = !!search ? "?search=".concat(search) : '';
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/admin/produk".concat(query)).then(function (res) {
         var produk = res.data.data;
 
-        _this8.setState({
+        _this9.setState({
           produk: produk
         });
       });
@@ -69294,7 +69326,7 @@ var Cart = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this9 = this;
+      var _this10 = this;
 
       var _this$state = this.state,
           cart = _this$state.cart,
@@ -69345,12 +69377,12 @@ var Cart = /*#__PURE__*/function (_Component) {
           className: "form-control form-control-sm qty",
           value: c.pivot.quantity,
           onChange: function onChange(event) {
-            return _this9.handleChangeQty(c.id, event.target.value);
+            return _this10.handleChangeQty(c.id, event.target.value);
           }
         }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
           className: "btn btn-danger btn-sm",
           onClick: function onClick() {
-            return _this9.handleDelete(c.id);
+            return _this10.handleDelete(c.id);
           }
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
           className: "fas fa-trash"
@@ -69377,7 +69409,8 @@ var Cart = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
         type: "button",
         className: "btn btn-primary btn-block",
-        disabled: !cart.length
+        disabled: !cart.length,
+        onClick: this.handleSubmit
       }, "Submit")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-md-6 col-lg-8"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -69393,7 +69426,7 @@ var Cart = /*#__PURE__*/function (_Component) {
       }, produk.map(function (p) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           onClick: function onClick() {
-            return _this9.addProdukToCart(p.barcode);
+            return _this10.addProdukToCart(p.barcode);
           },
           className: "item",
           key: p.id,

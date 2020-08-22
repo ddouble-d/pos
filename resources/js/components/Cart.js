@@ -26,6 +26,7 @@ export default class Cart extends Component {
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
         this.setCustomerId = this.setCustomerId.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     componentDidMount() {
@@ -36,7 +37,6 @@ export default class Cart extends Component {
 
     handleOnChangeBarcode(event) {
         const barcode = event.target.value;
-        console.log(barcode);
         this.setState({barcode});
     }
 
@@ -154,6 +154,32 @@ export default class Cart extends Component {
         return sum(total);
     }
 
+    handleSubmit() {
+        Swal.fire({
+            title: 'Total Harga',
+            input: 'text',
+            inputValue: this.getTotal(this.state.cart),
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            showLoaderOnConfirm: true,
+            preConfirm: (amount) => {
+                return axios.post('/admin/orders', {customer_id: this.state.customer_id, amount})
+                .then(res => {
+                    this.loadCart();
+                    return res.data;
+                })
+                .catch(err => {
+                    console.log(err.response.data.message);
+                    Swal.showValidationMessage(err.response.data.message)
+                });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+
+          })
+        
+    }
+
     loadCustomer() {
         axios.get('/admin/customer').then(res => {
             const customer = res.data;
@@ -257,6 +283,7 @@ export default class Cart extends Component {
                             type="button" 
                             className="btn btn-primary btn-block"
                             disabled={!cart.length}
+                            onClick={this.handleSubmit}
                         >Submit</button>
                     </div>
                 </div>
